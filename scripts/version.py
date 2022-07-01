@@ -39,9 +39,9 @@ class GitVersion:
 
         return {
             "GIT_COMMIT": commit,
-            "GIT_BRANCH": branch,
+            "GIT_BRANCH": "dev",
             "GIT_BRANCH_NUM": branch_num,
-            "VERSION": "0.62.0",
+            "VERSION": "0.61.2",
             "BUILD_DIRTY": 0,
         }
 

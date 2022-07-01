@@ -5,6 +5,7 @@ env.Append(
         "#/lib/digital_signal",
         "#/lib/fnv1a_hash",
         "#/lib/heatshrink",
+        "#/lib/mbedtls/include",
         "#/lib/micro-ecc",
         "#/lib/nanopb",
         "#/lib/nfc_protocols",

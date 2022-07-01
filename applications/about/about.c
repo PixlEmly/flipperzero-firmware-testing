@@ -125,7 +125,7 @@ static DialogMessageButton fw_version_screen(DialogsApp* dialogs, DialogMessage*
             "%s [%s]\n%s%s [%s] %s\n[%d] %s",
             version_get_version(ver),
             version_get_builddate(ver),
-            version_get_dirty_flag(ver) ? "" : "",
+            version_get_dirty_flag(ver) ? " " : "",
             version_get_githash(ver),
             version_get_gitbranchnum(ver),
             c2_ver ? c2_ver->StackTypeString : "<none>",
