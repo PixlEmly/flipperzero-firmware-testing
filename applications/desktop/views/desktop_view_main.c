@@ -5,9 +5,11 @@
 #include <furi.h>
 #include <input/input.h>
 #include <dolphin/dolphin.h>
-
 #include "../desktop_i.h"
 #include "desktop_view_main.h"
+#include "desktop/desktop_settings/desktop_settings_app.h"
+
+uint32_t codeSequence = 0;
 
 struct DesktopMainView {
     View* view;
@@ -17,6 +19,13 @@ struct DesktopMainView {
 };
 
 #define DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT 5000
+
+static void desktop_view_main_dumbmode_changed(bool isThisGameMode) {
+    DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
+    LOAD_DESKTOP_SETTINGS(&app->settings); 
+    app->settings.is_dumbmode = isThisGameMode;
+    SAVE_DESKTOP_SETTINGS(&app->settings);
+}
 
 static void desktop_main_poweroff_timer_callback(TimerHandle_t timer) {
     DesktopMainView* main_view = pvTimerGetTimerID(timer);
@@ -44,27 +53,85 @@ bool desktop_main_input(InputEvent* event, void* context) {
 
     DesktopMainView* main_view = context;
 
-    if(event->type == InputTypeShort) {
-        if(event->key == InputKeyOk) {
-            main_view->callback(DesktopMainEventOpenMenu, main_view->context);
-        } else if(event->key == InputKeyUp) {
-            main_view->callback(DesktopMainEventOpenLockMenu, main_view->context);
-        } else if(event->key == InputKeyDown) {
-            main_view->callback(DesktopMainEventOpenArchive, main_view->context);
-        } else if(event->key == InputKeyLeft) {
-            main_view->callback(DesktopMainEventOpenFavoritePrimary, main_view->context);
-        } else if(event->key == InputKeyRight) {
-            main_view->callback(DesktopMainEventOpenPassport, main_view->context);
+    DesktopSettings* desktop_settings = malloc(sizeof(DesktopSettings));
+    LOAD_DESKTOP_SETTINGS(desktop_settings);
+    if(!desktop_settings->is_dumbmode) {
+        if(event->type == InputTypeShort) {
+            if(event->key == InputKeyOk) {
+                main_view->callback(DesktopMainEventOpenMenu, main_view->context);
+            } else if(event->key == InputKeyUp) {
+                main_view->callback(DesktopMainEventOpenLockMenu, main_view->context);
+            } else if(event->key == InputKeyDown) {
+                main_view->callback(DesktopMainEventOpenArchive, main_view->context);
+            } else if(event->key == InputKeyLeft) {
+                main_view->callback(DesktopMainEventOpenFavoritePrimary, main_view->context);
+            } else if(event->key == InputKeyRight) {
+                main_view->callback(DesktopMainEventOpenPassport, main_view->context);
+            }
+        } else if(event->type == InputTypeLong) {
+            if(event->key == InputKeyOk) {
+                main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
+            } else if(event->key == InputKeyUp) {
+                main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
+            } else if(event->key == InputKeyDown) {
+                main_view->callback(DesktopMainEventOpenGames, main_view->context);
+            } else if(event->key == InputKeyLeft) {
+                main_view->callback(DesktopMainEventOpenFavoriteSecondary, main_view->context);
+            } else if(event->key == InputKeyRight) {
+                // THIS DOESNT WORK
+            }
         }
-    } else if(event->type == InputTypeLong) {
-        if(event->key == InputKeyDown) {
-            main_view->callback(DesktopMainEventOpenDebug, main_view->context);
-        } else if(event->key == InputKeyLeft) {
-            main_view->callback(DesktopMainEventOpenFavoriteSecondary, main_view->context);
-        } else if(event->key == InputKeyUp) {
-            main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
-        } else if (event->key == InputKeyOk) {
-            main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
+    } else {
+        if(event->type == InputTypeShort) {
+            if(event->key == InputKeyOk) {
+                if(codeSequence == 5 || codeSequence == 7) {
+                    codeSequence++;
+                } else {
+                    codeSequence = 0;
+                    main_view->callback(DesktopMainEventOpenGames, main_view->context);
+                }
+            } else if(event->key == InputKeyUp) {
+                if(codeSequence == 0 || codeSequence == 1) {
+                    codeSequence++;
+                } else {
+                    codeSequence = 0;
+                    main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
+                }
+            } else if(event->key == InputKeyDown) {
+                // PREFER TO OPEN GAMES MENU
+                if(codeSequence == 2 || codeSequence == 3) {
+                    codeSequence++;
+                } else {
+                    codeSequence = 0;
+                }
+            } else if(event->key == InputKeyLeft) {
+                if(codeSequence == 4 || codeSequence == 6) {
+                    codeSequence++;
+                } else {
+                    codeSequence = 0;
+                    main_view->callback(DesktopMainEventOpenClock, main_view->context);
+                }
+            } else if(event->key == InputKeyRight) {
+                // GOES TO PASSPORT NO MATTER WHAT
+            }
+            if(codeSequence == 8) {
+                // UNLOCK!
+                codeSequence = 0;
+                desktop_view_main_dumbmode_changed(0);
+                main_view->callback(DesktopMainEventOpenMenu, main_view->context);
+            }
+        } else if(event->type == InputTypeLong) {
+            if(event->key == InputKeyOk) {
+                main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
+            } else if(event->key == InputKeyUp) {
+                main_view->callback(DesktopMainEventOpenFavoriteGame, main_view->context);
+            } else if(event->key == InputKeyDown) {
+                main_view->callback(DesktopMainEventOpenGames, main_view->context);
+            } else if(event->key == InputKeyLeft) {
+                main_view->callback(DesktopMainEventOpenClock, main_view->context);
+            } else if(event->key == InputKeyRight) {
+                // THIS DOESNT WORK, PASSPORT WILL ONLY OPEN ON REGULAR RIGHT, NOTHING CAN GET ASSIGNED HERE
+            }
         }
     }
 

@@ -10,6 +10,7 @@
 #define SCENE_EVENT_SELECT_PIN_SETUP 3
 #define SCENE_EVENT_SELECT_AUTO_LOCK_DELAY 4
 #define SCENE_EVENT_SELECT_BATTERY_DISPLAY 5
+#define SCENE_EVENT_SELECT_DUMBMODE 6
 
 #define AUTO_LOCK_DELAY_COUNT 9
 const char* const auto_lock_delay_text[AUTO_LOCK_DELAY_COUNT] = {
@@ -37,6 +38,14 @@ const char* const battery_view_count_text[BATTERY_VIEW_COUNT] = {
 const uint32_t displayBatteryPercentage_value[BATTERY_VIEW_COUNT] =
     {0, 1, 2, 3, 4};
 
+#define DUMBMODE_COUNT 2
+const char* const dumbmode_text[DUMBMODE_COUNT] = {
+    "OFF",
+    "ON",
+};
+
+const uint32_t dumbmode_value[DUMBMODE_COUNT] = {0, 1};
+
 static void desktop_settings_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     DesktopSettingsApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
@@ -58,6 +67,13 @@ static void desktop_settings_scene_start_battery_view_changed(VariableItem* item
     app->settings.displayBatteryPercentage = index;
 }
 
+static void desktop_settings_scene_start_dumbmode_changed(VariableItem* item) {
+    DesktopSettingsApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, dumbmode_text[index]);
+    app->settings.is_dumbmode = dumbmode_value[index];
+}
 
 void desktop_settings_scene_start_on_enter(void* context) {
     DesktopSettingsApp* app = context;
@@ -81,8 +97,6 @@ void desktop_settings_scene_start_on_enter(void* context) {
         desktop_settings_scene_start_auto_lock_delay_changed,
         app);
 
-    variable_item_list_set_enter_callback(
-        variable_item_list, desktop_settings_scene_start_var_list_enter_callback, app);
     value_index = value_index_uint32(
         app->settings.auto_lock_delay_ms, auto_lock_delay_value, AUTO_LOCK_DELAY_COUNT);
     variable_item_set_current_value_index(item, value_index);
@@ -102,6 +116,19 @@ void desktop_settings_scene_start_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, battery_view_count_text[value_index]);
 
+    item = variable_item_list_add(
+        variable_item_list,
+        "Games Only",
+        DUMBMODE_COUNT,
+        desktop_settings_scene_start_dumbmode_changed,
+        app);
+
+    value_index = value_index_uint32(app->settings.is_dumbmode, dumbmode_value, DUMBMODE_COUNT);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, dumbmode_text[value_index]);
+    
+    variable_item_list_set_enter_callback(
+        variable_item_list, desktop_settings_scene_start_var_list_enter_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewVarItemList);
 }
 
@@ -134,6 +161,9 @@ bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent sme)
             consumed = true;
             break;
         case SCENE_EVENT_SELECT_BATTERY_DISPLAY:
+            consumed = true;
+            break;
+        case SCENE_EVENT_SELECT_DUMBMODE:
             consumed = true;
             break;
         }

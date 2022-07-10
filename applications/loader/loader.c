@@ -321,7 +321,7 @@ static Loader* loader_alloc() {
     instance->games_menu = submenu_alloc();
     view_set_context(submenu_get_view(instance->games_menu), instance->games_menu);
     view_set_previous_callback(
-        submenu_get_view(instance->games_menu), loader_back_to_primary_menu);
+        submenu_get_view(instance->games_menu), loader_hide_menu);
     view_dispatcher_add_view(
         instance->view_dispatcher, LoaderMenuViewGames, submenu_get_view(instance->games_menu));
     // Plugins menu
@@ -478,6 +478,13 @@ static void loader_build_submenu() {
 void loader_show_menu() {
     furi_assert(loader_instance);
     furi_thread_flags_set(loader_instance->loader_thread, LOADER_THREAD_FLAG_SHOW_MENU);
+}
+
+void loader_show_game_menu() {
+    furi_assert(loader_instance);
+    menu_set_selected_item(loader_instance->primary_menu, 10);
+    view_dispatcher_switch_to_view(loader_instance->view_dispatcher, LoaderMenuViewGames);
+    view_dispatcher_run(loader_instance->view_dispatcher);
 }
 
 void loader_update_menu() {
