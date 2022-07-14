@@ -7,18 +7,12 @@ appenv = ENV.Clone(tools=["fbt_extapps"])
 
 appenv.Replace(
     LINKER_SCRIPT="application-ext",
-    STRIPFLAGS=[
-        "--strip-debug",
-        "--strip-unneeded",
-        "-d",
-        "-g",
-        "-S",
-    ],
 )
 
 appenv.AppendUnique(
     CCFLAGS=[
-        "-Os",
+        # "-Os",
+        # "-Og",
         "-ggdb3",
         "-mword-relocations",
         "-mlong-calls",
@@ -28,7 +22,6 @@ appenv.AppendUnique(
     ],
     LINKFLAGS=[
         "-r",
-        "-s",
         # "-Bsymbolic",
         "-nostartfiles",
         "-mlong-calls",
@@ -47,10 +40,16 @@ for apptype in (FlipperAppType.PLUGIN, FlipperAppType.EXTERNAL):
     for app in appenv["APPBUILD"].get_apps_of_type(apptype):
         extapps.append(appenv.BuildAppElf(app))
 
+for apptype in (FlipperAppType.GAME, FlipperAppType.EXTERNAL):
+    for app in appenv["APPBUILD"].get_apps_of_type(apptype):
+        extapps.append(appenv.BuildAppElf(app))
+
 # Ugly access to global option
 if extra_app_list := GetOption("extra_ext_apps"):
     for extra_app in extra_app_list.split(","):
         extapps.append(appenv.BuildAppElf(appenv["APPMGR"].get(extra_app)))
 
+if appenv["FORCE"]:
+    appenv.AlwaysBuild(extapps)
 Alias(appenv["FIRMWARE_BUILD_CFG"] + "_extapps", extapps)
 Return("extapps")
