@@ -2,10 +2,7 @@
 
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
 <b>Latest Updates:</b>
-- OFW: Added [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
-- Moving apps to [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/elf) status in PLUGIN/GAMES list; to load with [the `.elf` files](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/elf) from SD using the `ELF Loader` APP.
-- Updated so elfs get built for games
-- Updated README with new compilation information `docker-compose exec dev ./fbt firmware_extapps FIRMWARE_APP_SET=ext_apps`
+- Added [WiFi Scanner (By gotnull)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/99) `HIDDEN "wifi_scanner"` due to hardware requirement
 
 <table width="100%" border="0" cellspacing="0">
   <tr>
@@ -67,7 +64,6 @@ $ docker-compose exec dev ./fbt
 
 
 ## Open PRs Checkedout & Not Merged In Main:
-- [[FL-2633] Move files from /int to /ext on SD mount #1384 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384)
 - [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
   
 </td><td>
@@ -133,16 +129,17 @@ $ docker-compose exec dev ./fbt
 - [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/raw/rogue_main/elf/apps/DolphinBackup.elf) [Dolphin Backup (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Modified by RogueMaster
 - [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/raw/rogue_main/elf/apps/DolphinRestorer.elf) [Dolphin Restorer (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Cloned by RogueMaster
 - [HID Analyzer (By Ownasaurus)](https://github.com/Ownasaurus/flipperzero-firmware/tree/hid-analyzer/applications/hid_analyzer)
-- [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/unleashed/applications/mousejacker) from nocomp/Frog/UberGuidoZ)
+- [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/unleashed/applications/mousejacker) from nocomp/Frog/UberGuidoZ) `Hardware Requirement: NRF24`
 - [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/raw/rogue_main/elf/apps/MouseJiggler.elf) [Mouse Jiggler (By Jacob-Tate)](https://github.com/Jacob-Tate/flipperzero-firmware/blob/dev/applications/mouse_jiggler/mouse_jiggler.c) (Original By MuddleBox)
 - [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/raw/rogue_main/elf/apps/MusicPlayer.elf) Music Player [OFW]
-- [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/unleashed/applications/nrfsniff) from nocomp/Frog/UberGuidoZ)
+- [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/unleashed/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Hardware Requirement: NRF24`
 - [PicoPass Reader (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1366)
 - [RF Remix (By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) [(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
 - [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/raw/rogue_main/elf/apps/SentrySafe.elf) [Sentry Safe (By H4ckd4ddy)](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/unleashed/applications/sentry_safe) from [UberGuidoZ](https://github.com/UberGuidoZ/))
 - [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/raw/rogue_main/elf/apps/SpectrumAnalyzer.elf) [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
 - [Touch Tunes Remote (By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
-- [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
+- [`ELF`](https://github.com/RogueMaster/awesome-flipperzero-withModules/raw/rogue_main/elf/apps/WavPlayer.elf) [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
+- [WiFi Scanner (By gotnull)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/99) `HIDDEN "wifi_scanner"` due to `Hardware Requirement: ESP8266`
 </details>
 </td></tr></table>
 
