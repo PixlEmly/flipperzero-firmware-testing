@@ -74,15 +74,17 @@ FIRMWARE_APPS = {
         "passport",
         "system_settings",
         "about",
-        # Plugins
         "basic_plugins",
         # Custom Games
         "custom_games",
+        # WIFI Plugins
+        "wifi_plugins",
         # Debug
         "debug_apps",
     ],
     "unit_tests": [
         "basic_services",
+        "updater_app",
         "unit_tests",
     ],
     "ext_apps": [

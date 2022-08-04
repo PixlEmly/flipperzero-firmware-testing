@@ -9,7 +9,7 @@
 
 static void desktop_view_lock_menu_dumbmode_changed(bool isThisGameMode) {
     DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
-    LOAD_DESKTOP_SETTINGS(&app->settings); 
+    LOAD_DESKTOP_SETTINGS(&app->settings);
     app->settings.is_dumbmode = isThisGameMode;
     SAVE_DESKTOP_SETTINGS(&app->settings);
 }
@@ -65,7 +65,7 @@ static void lock_menu_callback(void* context, uint8_t index) {
                 return true;
             });
         desktop_view_lock_menu_dumbmode_changed(1);
-        osDelay(500);
+        furi_delay_us(500);
         lock_menu->callback(DesktopLockMenuEventExit, lock_menu->context);
         break;
     default: // wip message
@@ -93,6 +93,7 @@ void desktop_lock_menu_render(Canvas* canvas, void* model) {
         const char* str = Lockmenu_Items[i];
 
         if(i == 1 && !m->pin_set) str = "Set PIN";
+
         if(m->hint_timeout && m->idx == 2 && m->idx == i) {
             str = "Not Implemented";
         } else if(m->hint_timeout && m->idx == 3 && m->idx == i) {

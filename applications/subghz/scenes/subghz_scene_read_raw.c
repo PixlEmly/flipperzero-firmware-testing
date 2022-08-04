@@ -101,10 +101,7 @@ void subghz_scene_read_raw_on_enter(void* context) {
     furi_assert(subghz->txrx->decoder_result);
 
     // make sure we're not in auto-detect mode, which is only meant for the Read app
-    subghz_protocol_decoder_raw_set_auto_mode(
-        subghz->txrx->decoder_result,
-        false
-    );
+    subghz_protocol_decoder_raw_set_auto_mode(subghz->txrx->decoder_result, false);
 
     //set filter RAW feed
     subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_RAW);
@@ -138,8 +135,12 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
                 //Restore default setting
-                subghz->txrx->frequency = subghz_setting_get_default_frequency(subghz->setting);
-                subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
+                subghz_preset_init(
+                    subghz,
+                    "AM650",
+                    subghz_setting_get_default_frequency(subghz->setting),
+                    NULL,
+                    0);
                 if(!scene_manager_search_and_switch_to_previous_scene(
                        subghz->scene_manager, SubGhzSceneSaved)) {
                     if(!scene_manager_search_and_switch_to_previous_scene(
@@ -209,6 +210,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
                    (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
                     if(!subghz_tx_start(subghz, subghz->txrx->fff_data)) {
+                        subghz->txrx->rx_key_state = SubGhzRxKeyStateBack;
                         scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
                     } else {
                         DOLPHIN_DEED(DolphinDeedSubGhzSend);
@@ -253,12 +255,20 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             uint32_t time = LL_RTC_TIME_Get(RTC); // 0x00HHMMSS
             uint32_t date = LL_RTC_DATE_Get(RTC); // 0xWWDDMMYY
             char strings[1][25];
-            sprintf(strings[0], "%s%.4d%.2d%.2d%.2d%.2d", "R"
-                , __LL_RTC_CONVERT_BCD2BIN((date >> 0) & 0xFF) + 2000 // YEAR
-                , __LL_RTC_CONVERT_BCD2BIN((date >> 8) & 0xFF) // MONTH
-                , __LL_RTC_CONVERT_BCD2BIN((date >> 16) & 0xFF) // DAY
-                , __LL_RTC_CONVERT_BCD2BIN((time >> 16) & 0xFF) // HOUR
-                , __LL_RTC_CONVERT_BCD2BIN((time >> 8) & 0xFF)  // DAY
+            snprintf(
+                strings[0],
+                sizeof(strings[0]),
+                "%s%.4d%.2d%.2d%.2d%.2d",
+                "R",
+                __LL_RTC_CONVERT_BCD2BIN((date >> 0) & 0xFF) + 2000 // YEAR
+                ,
+                __LL_RTC_CONVERT_BCD2BIN((date >> 8) & 0xFF) // MONTH
+                ,
+                __LL_RTC_CONVERT_BCD2BIN((date >> 16) & 0xFF) // DAY
+                ,
+                __LL_RTC_CONVERT_BCD2BIN((time >> 16) & 0xFF) // HOUR
+                ,
+                __LL_RTC_CONVERT_BCD2BIN((time >> 8) & 0xFF) // DAY
             );
 
             string_printf(
@@ -285,24 +295,34 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 uint32_t time = LL_RTC_TIME_Get(RTC); // 0x00HHMMSS
                 uint32_t date = LL_RTC_DATE_Get(RTC); // 0xWWDDMMYY
                 char strings[1][25];
-                sprintf(strings[0], "%s%.4d%.2d%.2d%.2d%.2d", "R"
-                    , __LL_RTC_CONVERT_BCD2BIN((date >> 0) & 0xFF) + 2000 // YEAR
-                    , __LL_RTC_CONVERT_BCD2BIN((date >> 8) & 0xFF) // MONTH
-                    , __LL_RTC_CONVERT_BCD2BIN((date >> 16) & 0xFF) // DAY
-                    , __LL_RTC_CONVERT_BCD2BIN((time >> 16) & 0xFF) // HOUR
-                    , __LL_RTC_CONVERT_BCD2BIN((time >> 8) & 0xFF)  // DAY
+                snprintf(
+                    strings[0],
+                    sizeof(strings[0]),
+                    "%s%.4d%.2d%.2d%.2d%.2d",
+                    "R",
+                    __LL_RTC_CONVERT_BCD2BIN((date >> 0) & 0xFF) + 2000 // YEAR
+                    ,
+                    __LL_RTC_CONVERT_BCD2BIN((date >> 8) & 0xFF) // MONTH
+                    ,
+                    __LL_RTC_CONVERT_BCD2BIN((date >> 16) & 0xFF) // DAY
+                    ,
+                    __LL_RTC_CONVERT_BCD2BIN((time >> 16) & 0xFF) // HOUR
+                    ,
+                    __LL_RTC_CONVERT_BCD2BIN((time >> 8) & 0xFF) // DAY
                 );
                 //subghz_get_preset_name(subghz, subghz->error_str);
                 if(subghz_protocol_raw_save_to_file_init(
                        (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result,
                        strings[0],
-                       subghz->txrx->frequency,
                        subghz->txrx->preset)) {
                     DOLPHIN_DEED(DolphinDeedSubGhzRawRec);
                     if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
                        (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
-                        subghz_begin(subghz, subghz->txrx->preset);
-                        subghz_rx(subghz, subghz->txrx->frequency);
+                        subghz_begin(
+                            subghz,
+                            subghz_setting_get_preset_data_by_name(
+                                subghz->setting, string_get_cstr(subghz->txrx->preset->name)));
+                        subghz_rx(subghz, subghz->txrx->preset->frequency);
                     }
                     subghz->state_notifications = SubGhzNotificationStateRx;
                     subghz->txrx->rx_key_state = SubGhzRxKeyStateAddKey;

@@ -32,10 +32,10 @@ typedef struct {
     FuriHalRtcDateTime datetime;
 } ClockState;
 
-static void dice_input_callback(InputEvent* input_event, osMessageQueueId_t event_queue) {
+static void dice_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
     PluginEvent event = {.type = EventTypeKey, .input = *input_event};
-    osMessageQueuePut(event_queue, &event, 0, osWaitForever);
+    furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
 static void dice_render_callback(Canvas* const canvas, void* ctx) {
@@ -61,11 +61,12 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
     if(letsRoll) {
         static bool rand_generator_inited = false;
         if(!rand_generator_inited) {
-            srand(osKernelGetTickCount());
+            srand(furi_get_tick());
             rand_generator_inited = true;
         }
-        sprintf(
+        snprintf(
             rollTime[0],
+            sizeof(rollTime[0]),
             "%.2d:%.2d:%.2d",
             state->datetime.hour,
             state->datetime.minute,
@@ -93,10 +94,10 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "Very doubtful",
                 "My reply is no"};
             diceRoll = ((rand() % diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
-            sprintf(diceType[0], "%s", "8BALL");
-            sprintf(strings[0], "%s at %s", diceType[0], rollTime[0]);
+            snprintf(diceType[0], sizeof(diceType[0]), "%s", "8BALL");
+            snprintf(strings[0], sizeof(strings[0]), "%s at %s", diceType[0], rollTime[0]);
             uint8_t d1_i = rand() % COUNT_OF(eightBall);
-            sprintf(strings[1], "%s", eightBall[d1_i]);
+            snprintf(strings[1], sizeof(strings[1]), "%s", eightBall[d1_i]);
         } else if(diceSelect == 230) {
             const char* diceOne[] = {
                 "Nibble",
@@ -122,11 +123,11 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "???",
                 "Genitals"};
             diceRoll = ((rand() % diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
-            sprintf(diceType[0], "%s", "SEX?");
-            sprintf(strings[0], "%s at %s", diceType[0], rollTime[0]);
+            snprintf(diceType[0], sizeof(diceType[0]), "%s", "SEX?");
+            snprintf(strings[0], sizeof(strings[0]), "%s at %s", diceType[0], rollTime[0]);
             uint8_t d1_i = rand() % COUNT_OF(diceOne);
             uint8_t d2_i = rand() % COUNT_OF(diceTwo);
-            sprintf(strings[1], "%s %s", diceOne[d1_i], diceTwo[d2_i]);
+            snprintf(strings[1], sizeof(strings[1]), "%s %s", diceOne[d1_i], diceTwo[d2_i]);
         } else if(diceSelect == 231) {
             const char* deckOne[] = {"2H", "2C", "2D", "2S", "3H", "3C",  "3D",  "3S",  "4H",
                                      "4C", "4D", "4S", "5H", "5C", "5D",  "5S",  "6H",  "6C",
@@ -141,24 +142,24 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                                "JH", "JC", "JD", "JS", "QH", "QC",  "QD",  "QS",  "KH",
                                "KC", "KD", "KS", "AH", "AC", "AD"}; // ONE LESS SINCE ONE WILL BE REMOVED
             diceRoll = ((rand() % diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
-            sprintf(diceType[0], "%s", "WAR!");
-            sprintf(strings[0], "%s at %s", diceType[0], rollTime[0]);
+            snprintf(diceType[0], sizeof(diceType[0]), "%s", "WAR!");
+            snprintf(strings[0], sizeof(strings[0]), "%s at %s", diceType[0], rollTime[0]);
             uint8_t d1_i = rand() % COUNT_OF(deckOne);
             // INITIALIZE WITH PLACEHOLDERS TO AVOID MAYBE UNINITIALIZED ERROR
             for(int i = 0; i < COUNT_OF(deckOne); i++) {
                 if(i < d1_i) {
-                    sprintf(deckTwo[i], "%s", deckOne[i]);
+                    snprintf(deckTwo[i], 8, "%s", deckOne[i]);
                 } else if(i > d1_i) {
-                    sprintf(deckTwo[i - 1], "%s", deckOne[i]);
+                    snprintf(deckTwo[i - 1], 8, "%s", deckOne[i]);
                 }
             }
             uint8_t d2_i = rand() % COUNT_OF(deckTwo);
             if(d1_i > d2_i) {
                 playerOneScore++;
-                sprintf(strings[1], "%s > %s", deckOne[d1_i], deckTwo[d2_i]);
+                snprintf(strings[1], sizeof(strings[1]), "%s > %s", deckOne[d1_i], deckTwo[d2_i]);
             } else {
                 playerTwoScore++;
-                sprintf(strings[1], "%s < %s", deckOne[d1_i], deckTwo[d2_i]);
+                snprintf(strings[1], sizeof(strings[1]), "%s < %s", deckOne[d1_i], deckTwo[d2_i]);
             }
         } else if(diceSelect == 232) {
             const char* diceOne[] = {
@@ -185,42 +186,47 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "then sing a song",
                 "then do a dance"};
             diceRoll = ((rand() % diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
-            sprintf(diceType[0], "%s", "WEED!");
-            sprintf(strings[0], "%s at %s", diceType[0], rollTime[0]);
+            snprintf(diceType[0], sizeof(diceType[0]), "%s", "WEED!");
+            snprintf(strings[0], sizeof(strings[0]), "%s at %s", diceType[0], rollTime[0]);
             uint8_t d1_i = rand() % COUNT_OF(diceOne);
             uint8_t d2_i = rand() % COUNT_OF(diceTwo);
             uint8_t d3_i = rand() % COUNT_OF(diceThree);
             uint8_t d4_i = rand() % COUNT_OF(diceFour);
-            sprintf(strings[1], "%s", diceOne[d1_i]);
-            sprintf(strings[2], "%s", diceTwo[d2_i]);
-            sprintf(strings[3], "%s", diceThree[d3_i]);
-            sprintf(strings[4], "%s", diceFour[d4_i]);
+            snprintf(strings[1], sizeof(strings[1]), "%s", diceOne[d1_i]);
+            snprintf(strings[2], sizeof(strings[2]), "%s", diceTwo[d2_i]);
+            snprintf(strings[3], sizeof(strings[3]), "%s", diceThree[d3_i]);
+            snprintf(strings[4], sizeof(strings[4]), "%s", diceFour[d4_i]);
         } else {
             diceRoll = ((rand() % diceSelect) + 1);
-            sprintf(diceType[0], "%s%d", "d", diceSelect);
-            sprintf(strings[0], "%d%s at %s", diceQty, diceType[0], rollTime[0]);
+            snprintf(diceType[0], sizeof(diceType[0]), "%s%d", "d", diceSelect);
+            snprintf(
+                strings[0], sizeof(strings[0]), "%d%s at %s", diceQty, diceType[0], rollTime[0]);
             if(diceQty == 1) {
-                sprintf(strings[1], "%d", diceRoll);
+                snprintf(strings[1], sizeof(strings[1]), "%d", diceRoll);
             } else if(diceQty == 2) {
-                sprintf(strings[1], "%d %d", diceRoll, ((rand() % diceSelect) + 1));
+                snprintf(
+                    strings[1], sizeof(strings[1]), "%d %d", diceRoll, ((rand() % diceSelect) + 1));
             } else if(diceQty == 3) {
-                sprintf(
+                snprintf(
                     strings[1],
+                    sizeof(strings[1]),
                     "%d %d %d",
                     diceRoll,
                     ((rand() % diceSelect) + 1),
                     ((rand() % diceSelect) + 1));
             } else if(diceQty == 4) {
-                sprintf(
+                snprintf(
                     strings[1],
+                    sizeof(strings[1]),
                     "%d %d %d %d",
                     diceRoll,
                     ((rand() % diceSelect) + 1),
                     ((rand() % diceSelect) + 1),
                     ((rand() % diceSelect) + 1));
             } else if(diceQty == 5) {
-                sprintf(
+                snprintf(
                     strings[1],
+                    sizeof(strings[1]),
                     "%d %d %d %d %d",
                     diceRoll,
                     ((rand() % diceSelect) + 1),
@@ -228,8 +234,9 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                     ((rand() % diceSelect) + 1),
                     ((rand() % diceSelect) + 1));
             } else if(diceQty == 6) {
-                sprintf(
+                snprintf(
                     strings[1],
+                    sizeof(strings[1]),
                     "%d %d %d %d %d %d",
                     diceRoll,
                     ((rand() % diceSelect) + 1),
@@ -258,8 +265,9 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
         }
         if(diceSelect == 231 && !(playerOneScore == 0 && playerTwoScore == 0)) {
             canvas_set_font(canvas, FontSecondary);
-            sprintf(
+            snprintf(
                 theScores[0],
+                sizeof(theScores[0]),
                 "%d                                   %d",
                 playerOneScore,
                 playerTwoScore);
@@ -312,9 +320,9 @@ static void diceclock_state_init(ClockState* const state) {
 
 static void dice_tick(void* ctx) {
     furi_assert(ctx);
-    osMessageQueueId_t event_queue = ctx;
+    FuriMessageQueue* event_queue = ctx;
     PluginEvent event = {.type = EventTypeTick};
-    osMessageQueuePut(event_queue, &event, 0, 0);
+    furi_message_queue_put(event_queue, &event, 0);
 }
 
 int32_t dice_app(void* p) {
@@ -325,7 +333,7 @@ int32_t dice_app(void* p) {
     diceRoll = 0;
     playerOneScore = 0;
     playerTwoScore = 0;
-    osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(PluginEvent), NULL);
+    FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
     ClockState* plugin_state = malloc(sizeof(ClockState));
     diceclock_state_init(plugin_state);
     ValueMutex state_mutex;
@@ -337,15 +345,15 @@ int32_t dice_app(void* p) {
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, dice_render_callback, &state_mutex);
     view_port_input_callback_set(view_port, dice_input_callback, event_queue);
-    osTimerId_t timer = osTimerNew(dice_tick, osTimerPeriodic, event_queue, NULL);
-    osTimerStart(timer, osKernelGetTickFreq());
+    FuriTimer* timer = furi_timer_alloc(dice_tick, FuriTimerTypePeriodic, event_queue);
+    furi_timer_start(timer, furi_kernel_get_tick_frequency());
     Gui* gui = furi_record_open("gui");
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     PluginEvent event;
     for(bool processing = true; processing;) {
-        osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 100);
+        FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         ClockState* plugin_state = (ClockState*)acquire_mutex_block(&state_mutex);
-        if(event_status == osOK) {
+        if(event_status == FuriStatusOk) {
             if(event.type == EventTypeKey) {
                 if(event.input.type == InputTypeShort || event.input.type == InputTypeRepeat) {
                     switch(event.input.key) {
@@ -412,11 +420,11 @@ int32_t dice_app(void* p) {
         view_port_update(view_port);
         release_mutex(&state_mutex, plugin_state);
     }
-    osTimerDelete(timer);
+    furi_timer_free(timer);
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     furi_record_close("gui");
     view_port_free(view_port);
-    osMessageQueueDelete(event_queue);
+    furi_message_queue_free(event_queue);
     return 0;
 }
